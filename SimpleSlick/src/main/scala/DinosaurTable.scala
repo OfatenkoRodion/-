@@ -22,7 +22,7 @@ final case class Dinosaur(id: Option[Int],
                           typeOfFood: TypeOfFood,
                           lifespan: Option[Int])
 
-trait DinosaurModel extends InitTable {
+trait DinosaurModel {
 
   implicit val typeOfFoodMapped =  MappedColumnType.base[TypeOfFood, String] (
     in => in.value,
@@ -38,7 +38,7 @@ trait DinosaurModel extends InitTable {
     def isFly = column[Boolean]("isFly")
     def isSwim = column[Boolean]("isSwim")
     def typeOfFood = column[TypeOfFood]("typeOfFood")
-    def lifespan = column[Option[Int]]("lifespan")
+    def lifespan  = column[Option[Int]]("lifespan")
 
     override def * = (id, weight, height, gender, isFly, isSwim, typeOfFood, lifespan).mapTo[Dinosaur]
     //override def * = (id, weight, height, gender, isFly, isSwim, typeOfFood, lifespan) <> ((Dinosaur.apply _).tupled, Dinosaur.unapply)
@@ -46,7 +46,6 @@ trait DinosaurModel extends InitTable {
 
   val dinosaurs = TableQuery[DinosaurTable]
   lazy val dinosaursSeq: Sequence[Int] = Sequence[Int]("dino_id_seq")
-  override def init = dinosaurs.schema.create
 
 }
 

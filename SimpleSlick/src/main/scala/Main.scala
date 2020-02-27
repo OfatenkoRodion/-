@@ -10,8 +10,10 @@ object Main extends App {
     password = "1234",
     driver = "org.postgresql.Driver"))
 
-  val dinosaurModel = new DinosaurModel{}
-  val dinosaurDAO: DinosaurDAO = new DinosaurDAOImpl(dinosaurModel)
+  val models = new DinosaurModel
+    with EventLogsModel {}
+
+  val dinosaurDAO: DinosaurDAO = new DinosaurDAOImpl(models)
 
   val dinosaur = Dinosaur(
     id = None,
@@ -25,6 +27,7 @@ object Main extends App {
   )
 
 
-  queryRunner.run(dinosaurDAO.mapDinosaurParam)
+  queryRunner.run(dinosaurDAO.update(dinosaur))
+  //queryRunner.run(dinosaurDAO.init)
 
 }

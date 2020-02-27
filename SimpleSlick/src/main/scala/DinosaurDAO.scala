@@ -1,3 +1,5 @@
+import java.time.Instant
+
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
@@ -8,34 +10,52 @@ trait DinosaurDAO {
 
   def init: DBIO[Unit]
 
-  def initIdGenerator: SqlAction[Int, NoStream, Effect]
+  protected def initIdGenerator: SqlAction[Int, NoStream, Effect]
 
   def selectALL: DBIO[Seq[Dinosaur]]
 
   def create(dinosaur: Dinosaur): DBIO[Dinosaur]
+
+  def update(dinosaur: Dinosaur): DBIO[Dinosaur]
 
   def take(n: Int): DBIO[Seq[Dinosaur]]
 
   def mapDinosaurParam:  DBIO[Seq[BodyParams]]
 }
 
-class DinosaurDAOImpl(dinosaurModel: DinosaurModel)
+class DinosaurDAOImpl(dinosaurModel: DinosaurModel with EventLogsModel)
                      (implicit executionContext: ExecutionContext) extends DinosaurDAO {
 
-  import dinosaurModel.{dinosaurs, dinosaursSeq}
+  import dinosaurModel.{dinosaurs, dinosaursSeq, eventLogs}
 
-  def init: DBIO[Unit] = dinosaurModel.init
+  // Склеиваем все что нужно для создания, не отдельно же вызывать?)
+  def init: DBIO[Unit] = {
+    for {
+     _ <- (dinosaurs.schema ++ eventLogs.schema).create
+     _ <- initIdGenerator
+    } yield {}
+  }
 
-  def initIdGenerator: SqlAction[Int, NoStream, Effect] = sqlu"""create sequence "dino_id_seq" start with 1 increment by 1;"""
+  protected def initIdGenerator: SqlAction[Int, NoStream, Effect] = sqlu"""create sequence "dino_id_seq" start with 1 increment by 1;"""
 
   def selectALL: DBIO[Seq[Dinosaur]] = dinosaurs.result
+
 
   def create(dinosaur: Dinosaur): DBIO[Dinosaur] = {
     for {
       newId <- dinosaursSeq.next.result
       dino = dinosaur.copy(id = Some(newId))
       _ <- dinosaurs += dino
+      _ <- eventLogs += EventLogs(None, newId, Some(Instant.now), None)
     } yield dino
+  }
+
+  def update(dinosaur: Dinosaur): DBIO[Dinosaur] = {
+    for {
+      _ <- dinosaurs
+        .update(dinosaur)
+      _ <- dinosaur.id.map(idReal => eventLogs += EventLogs(None, idReal, None, Some(Instant.now))).getOrElse(DBIO.successful(()))
+    } yield dinosaur
   }
 
   //<ерет первые n элементов. Удобная штука, когда надо обрабатывать что-то по очереди, например некие заявки
