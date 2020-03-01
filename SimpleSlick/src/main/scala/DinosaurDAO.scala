@@ -20,7 +20,17 @@ trait DinosaurDAO {
 
   def take(n: Int): DBIO[Seq[Dinosaur]]
 
-  def mapDinosaurParam:  DBIO[Seq[BodyParams]]
+  def mapDinosaurParam: DBIO[Seq[BodyParams]]
+
+  def leftJoinExample: DBIO[Seq[(Dinosaur, Option[EventLogs])]]
+
+  def rightJoinExample: DBIO[Seq[(Option[Dinosaur], EventLogs)]]
+
+  def fullJoinExample: DBIO[Seq[(Option[Dinosaur], Option[EventLogs])]]
+
+  def innerJoinExample: DBIO[Seq[(Dinosaur, EventLogs)]]
+
+  def crossJoinExample: DBIO[Seq[(Dinosaur, EventLogs)]]
 }
 
 class DinosaurDAOImpl(dinosaurModel: DinosaurModel with EventLogsModel)
@@ -31,8 +41,8 @@ class DinosaurDAOImpl(dinosaurModel: DinosaurModel with EventLogsModel)
   // Склеиваем все что нужно для создания, не отдельно же вызывать?)
   def init: DBIO[Unit] = {
     for {
-     _ <- (dinosaurs.schema ++ eventLogs.schema).create
-     _ <- initIdGenerator
+      _ <- (dinosaurs.schema ++ eventLogs.schema).create
+      _ <- initIdGenerator
     } yield {}
   }
 
@@ -74,5 +84,36 @@ class DinosaurDAOImpl(dinosaurModel: DinosaurModel with EventLogsModel)
       //.map(_.map(v => BodyParams(v._1, v._2))) // or
       .map(_.map((BodyParams.apply _).tupled))
   }
+
+  def leftJoinExample: DBIO[Seq[(Dinosaur, Option[EventLogs])]] = {
+    for {
+      (d, e) <- dinosaurs joinLeft eventLogs on (_.id === _.dinosaurId)
+    } yield (d, e)
+  }.result
+
+  def rightJoinExample: DBIO[Seq[(Option[Dinosaur], EventLogs)]] = {
+    for {
+      (d, e) <- dinosaurs joinRight eventLogs on (_.id === _.dinosaurId)
+    } yield (d, e)
+  }.result
+
+  def fullJoinExample: DBIO[Seq[(Option[Dinosaur], Option[EventLogs])]] = {
+    for {
+      (d, e) <- dinosaurs joinFull eventLogs on (_.id === _.dinosaurId)
+    } yield (d, e)
+  }.result
+
+  def innerJoinExample: DBIO[Seq[(Dinosaur, EventLogs)]] = {
+    for {
+      (d, e) <- dinosaurs join eventLogs on (_.id === _.dinosaurId)
+    } yield (d, e)
+  }.result
+
+  // Fuuuuuuuuuuuu
+  def crossJoinExample: DBIO[Seq[(Dinosaur, EventLogs)]] = {
+    for {
+      (d, e) <- dinosaurs join eventLogs
+    } yield (d, e)
+  }.result
 
 }
