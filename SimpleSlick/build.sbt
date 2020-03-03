@@ -9,3 +9,10 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.10"
 libraryDependencies += "com.github.tminglei" %% "slick-pg_core" % "0.18.1"
+
+import com.permutive.sbtliquibase.SbtLiquibase
+enablePlugins(SbtLiquibase)
+liquibaseUsername := "postgres"
+liquibasePassword := "1234"
+liquibaseDriver   := "org.postgresql.Driver"
+liquibaseUrl      := "jdbc:postgresql://localhost:5432/dino"
