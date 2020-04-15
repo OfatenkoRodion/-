@@ -13,10 +13,16 @@ object Dependencies {
         "com.typesafe.akka" %% "akka-actor" % akkaVersion,
         "com.typesafe.akka" %% "akka-stream" % akkaVersion,
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        
         "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided",
+        
+        "io.swagger" % "swagger-annotations" % "1.5.22",
         "io.swagger.core.v3" % "swagger-core" % "2.1.0",
+        "javax.ws.rs" % "javax.ws.rs-api" % "2.1",
+        
         "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
         "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
+    
         "io.circe" %% "circe-parser" % "0.13.0-RC1",
         "io.circe" %% "circe-generic" % "0.13.0-RC1"
       )

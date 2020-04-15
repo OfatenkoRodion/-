@@ -29,6 +29,9 @@ object Main extends App {
     circleController
   )
 
+  Swagger(system).routes ~
+    getFromResourceDirectory("swagger-ui")
+
   private val routes: Route =
       pathPrefix("api" / "v1") {
         circleController.route ~
