@@ -13,8 +13,7 @@ import com.softwaremill.macwire._
 import configuretion.CircleServiceConfiguration
 import controller.CircleController
 import io.swagger.annotations.Api
-import io.swagger.models.Info
-import io.swagger.models.{Scheme, Swagger}
+import io.swagger.models.{Info, Scheme, SecurityRequirement, Swagger}
 import org.webjars.WebJarAssetLocator
 import service.{CircleService, CircleServiceImpl}
 import util.Controller
@@ -48,7 +47,7 @@ object Main extends App {
 
   val swagger: Controller = new Controller {
 
-    val clientId = "MATH"
+    val clientId = "localhost:8080"
     val tagFilter = "MATH"
     val basePath = "/api/v1"
     val packages = Seq("controller")
@@ -169,7 +168,18 @@ object Main extends App {
           .basePath(basePath)
           .schemes(Seq(Scheme.HTTP).asJava)
           .host(host)
-        postProcess(swagger)
+
+        security.foreach { m =>
+          m.foreach { case (key, value) =>
+            val sr = new SecurityRequirement
+            sr.requirement(key, value.asJava)
+            swagger.addSecurity(sr)
+          }
+        }
+        //postProcess(swagger)
+
+
+
         swagger
       }
 
@@ -210,13 +220,15 @@ object Main extends App {
 
       def findTags(value: String): Seq[String] = subtagPattern.findAllIn(value).matchData.toSeq.map(_.group(1).toLowerCase)
 
-      val serviceClasses = packages.flatMap(new Reflections(_).getTypesAnnotatedWith(classOf[Api]).asScala.toSet)
-      val validTagsSeq = tagFilter.toSeq
+      /*val serviceClasses = */ packages.flatMap(new Reflections(_).getTypesAnnotatedWith(classOf[Api]).asScala.toSet)
+     /* val validTagsSeq = tagFilter.toSeq
       serviceClasses.filter { serviceClass =>
         findApiAnnotation(serviceClass).exists { annotation =>
           validTagsSeq.exists(findTags(getAnnotationValue(annotation)).contains)
         }
-      }
+      }*/
+
+
     }
 
 
