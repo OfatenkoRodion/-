@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 import scala.util.Success
 
 
-@Api(value = "Пример [EXAMPLE]")
+@Api(value = "Пример [MATH]")
 @Path("/")
 class CircleController(circleService: CircleService)
                       (implicit executionContext: ExecutionContext) extends Controller {

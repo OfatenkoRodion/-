@@ -17,9 +17,14 @@ object Dependencies {
         "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided",
         
         "io.swagger" % "swagger-annotations" % "1.5.22",
-        "io.swagger.core.v3" % "swagger-core" % "2.1.0",
+        "io.swagger" % "swagger-core" % "1.5.22",
+        "io.swagger" % "swagger-jaxrs" % "1.5.22",
         "javax.ws.rs" % "javax.ws.rs-api" % "2.1",
-        
+        "org.webjars" % "webjars-locator" % "0.36",
+        "org.reflections" % "reflections" % "0.9.11",
+        "org.webjars" % "swagger-ui" % "3.24.3",
+        "org.slf4j" % "slf4j-api" % "1.7.25",
+
         "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
         "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
     
