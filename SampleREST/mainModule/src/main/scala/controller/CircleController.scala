@@ -18,22 +18,41 @@ import scala.util.Success
 class CircleController(circleService: CircleService)
                       (implicit executionContext: ExecutionContext) extends Controller {
 
+  override def route: Route = {
+    route1 ~
+    route2
+  }
+
   @ApiOperation(value = "Считает площадь фигуры", httpMethod = "GET")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "area", paramType = "path", required = true, dataType = "number")
   ))
   @Path("/math/circle/{area}")
-  override def route: Route = {
-    pathPrefix("math"){
-      path("circle" / DoubleNumber) { area =>
-        get {
-          onComplete(circleService.getArea(area)) {
-            case Success(v) => complete(v)
-          }
+  protected def route1: Route = pathPrefix("math") {
+    path("circle" / DoubleNumber) { area =>
+      get {
+        onComplete(circleService.getArea(area)) {
+          case Success(v) => complete(v)
         }
       }
     }
   }
+
+  @ApiOperation(value = "Считает площадь фигуры через квери парам", httpMethod = "GET")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "area", paramType = "query", required = true, dataType = "number")
+  ))
+  @Path("/math/circle/")
+  protected def route2: Route = pathPrefix("math") {
+    parameter("area".as[Double]){ area =>
+      get {
+        onComplete(circleService.getArea(area)) {
+          case Success(v) => complete(v)
+        }
+      }
+    }
+  }
+
 
   implicit def jsonMarshaller[A](implicit encoder: Encoder[A], e: ToResponseMarshaller[HttpResponse]): ToResponseMarshaller[A] =
     e.compose(v =>
