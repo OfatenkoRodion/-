@@ -38,7 +38,7 @@ object ChangeBehaviorsActor extends App {
 
     def sadReceive: Receive = {
       case Food(VEGETABLE) =>
-      case Food(CHOCOLATE) =>context.become(happyReceive)
+      case Food(CHOCOLATE) => context.become(happyReceive)
       case Ask => sender ! KidReject
     }
   }
