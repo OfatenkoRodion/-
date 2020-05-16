@@ -7,7 +7,7 @@ object JFrameFactory {
 
   def create: JFrame = {
     val frame = new JFrame()
-    frame.setSize(new Dimension(600, 400))
+    frame.setSize(new Dimension(600, 600))
     frame.setLocationRelativeTo(null)
     frame.setVisible(true)
 
