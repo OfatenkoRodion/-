@@ -43,17 +43,22 @@ object Main2 extends App {
     def sumReceive(sum: Int): Receive = {
       case Increment => context.become(sumReceive(sum + 1))
       case Decrement => context.become(sumReceive(sum - 1))
-      case Print => println(s"[CounterActor] sum: $sum")
+      case Print => println(s"[CounterActor] ${self.path} sum: $sum")
+      case any_message => println(s"[CounterActor] default: $any_message")
     }
   }
 
   val actorSystem = ActorSystem("system")
 
-  val counter = actorSystem.actorOf(Props[CounterActor])
+  val counter = actorSystem.actorOf(Props[CounterActor], "counter_name")
 
   counter ! Increment
   counter ! Decrement
   counter ! Increment
 
   counter ! Print
+
+  val maybeActot= actorSystem.actorSelection("/user/counter_name")
+
+  maybeActot ! "Found you with selection"
 }
