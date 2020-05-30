@@ -11,7 +11,7 @@ object StopActorExamples {
 
   someActor ! SomeActor.CreateChild(childName)
   someActor ! SomeActor.ContextStopChild(childName)
-  someActor ! SomeActor.ContextStop(childName)
+  someActor ! SomeActor.ContextStop
 
   /**
     * PoisonPill немедленно убьет актор
