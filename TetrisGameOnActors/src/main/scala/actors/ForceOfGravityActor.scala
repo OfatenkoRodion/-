@@ -27,7 +27,7 @@ class ForceOfGravityActor extends Actor {
 
   private val jFrameActor = context.actorOf(Props[JFrameActor])
 
-  context.system.scheduler.schedule(0 seconds, 500 milliseconds)(self ! TickGravity)
+  context.system.scheduler.schedule(0 seconds, 100 milliseconds)(self ! TickGravity)
 
   override def receive: Receive = {
     case Init =>
@@ -48,26 +48,26 @@ class ForceOfGravityActor extends Actor {
       jFrameActor ! JFrameActor.Points(shapeMap.values.flatten.toSeq ++ staticPoints)
 
     case TickGravity =>
-      val (stillFalling, needStop) = shapeMap.partition {
+
+      // try to find shapes that are before lower border
+      val (stillFalling, needStopBorderAchieve) = shapeMap.partition {
         case (_, shape) => shape.maxBy(_.yAxis).yAxis < GlobalSettings.Height - GlobalSettings.BlockSize * 2
       }
 
-      val (needStop2, stillFalling2) = stillFalling.partition {
+      // try to find shapes that are before another shapes under them
+      val (needStopShapesFallAfterGotLine, stillFallingStage2) = stillFalling.partition {
         case (_, shape) => shape.exists { s =>
-          isPointInList(s.copy(yAxis = s.yAxis + GlobalSettings.BlockSize), staticPoints)
+          checkCollision(s.copy(yAxis = s.yAxis + GlobalSettings.BlockSize), staticPoints)
         }
       }
 
-      val newMap = stillFalling2.map {
+      if (shapeMap.isEmpty) shapeProducer ! GreatRandomActor.NextShape
+
+      val (needRestart, newStaticPoints) = checkFullLine(staticPoints ++ needStopBorderAchieve.flatMap(_._2) ++ needStopShapesFallAfterGotLine.flatMap(_._2))
+
+      val newMap = stillFallingStage2.map {
         case (key, shape) => key -> shape.map(s => s.copy(yAxis = s.yAxis + GlobalSettings.BlockSize))
       }
-
-
-      if ((needStop ++ needStop2).nonEmpty) shapeProducer ! GreatRandomActor.NextShape
-
-      val (needRestart, newStaticPoints) = checkFullLine(staticPoints ++ needStop.flatMap(_._2) ++ needStop2.flatMap(_._2))
-
-      println("needRestart:"+ needRestart)
 
       if (needRestart)
         context.become(pointsHolderWithId(newMap + (UUID.randomUUID() -> newStaticPoints), Seq.empty, shapeProducer, lastShapeId))
@@ -88,13 +88,20 @@ class ForceOfGravityActor extends Actor {
       }
       shapeMovedOpt.foreach { shape =>
         if (shape.forall(_.xAxis >= 0) && shape.forall(_.xAxis <= GlobalSettings.Width - GlobalSettings.BlockSize)) {
-          context.become(pointsHolderWithId(shapeMap + (lastShapeId -> shape), staticPoints, shapeProducer, lastShapeId))
-          self ! RedrawFrame
+
+          val isCollision = shape.exists { s =>
+            checkCollision(s.copy(yAxis = s.yAxis + GlobalSettings.BlockSize), staticPoints)
+          }
+
+          if (!isCollision) {
+            context.become(pointsHolderWithId(shapeMap + (lastShapeId -> shape), staticPoints, shapeProducer, lastShapeId))
+            self ! RedrawFrame
+          }
         }
       }
   }
 
-  private def isPointInList(point: JPoint, points: Seq[JPoint]): Boolean = {
+  private def checkCollision(point: JPoint, points: Seq[JPoint]): Boolean = {
     points.exists(p => (point.yAxis == p.yAxis) && (point.xAxis == p.xAxis))
   }
 
