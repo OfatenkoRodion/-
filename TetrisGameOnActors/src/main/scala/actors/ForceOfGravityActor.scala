@@ -27,7 +27,7 @@ class ForceOfGravityActor extends Actor {
 
   private val jFrameActor = context.actorOf(Props[JFrameActor])
 
-  context.system.scheduler.schedule(0 seconds, 100 milliseconds)(self ! TickGravity)
+  context.system.scheduler.schedule(0 seconds, 300 milliseconds)(self ! TickGravity)
 
   override def receive: Receive = {
     case Init =>

@@ -12,6 +12,8 @@ object JFrameFactory {
     frame.setSize(new Dimension(GlobalSettings.Width, GlobalSettings.Height))
     frame.setLocationRelativeTo(null)
     frame.setVisible(true)
+    frame.setResizable(false)
+    frame.setTitle("TETRIS v1.0 by Rodion Ofatenko")
 
     frame.addWindowListener(new WindowAdapter {
       override def windowClosing(e: WindowEvent): Unit = {
