@@ -2,7 +2,11 @@ package primitives
 
 object Main {
 
-  trait Monoid[A] {
+  trait Semigroup[A] {
+    def combine(x: A, y: A): A
+  }
+
+  trait Monoid[A] extends Semigroup[A]{
     def combine(x: A, y: A): A
     def empty: A
   }
@@ -14,5 +18,7 @@ object Main {
   def identityLaw[A](x: A)(implicit m: Monoid[A]): Boolean = {
     (m.combine(x, m.empty) == x) && (m.combine(m.empty, x) == x)
   }
+
+
 }
 
