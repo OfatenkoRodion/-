@@ -5,6 +5,7 @@ val circeVersion = "0.13.0"
 
 // https://mvnrepository.com/artifact/org.typelevel/cats-core
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.3.0"
+libraryDependencies += "io.scalaland" %% "chimney" % "0.4.1"
 
 libraryDependencies ++=
   Seq(
