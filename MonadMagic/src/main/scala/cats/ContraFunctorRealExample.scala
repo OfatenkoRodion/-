@@ -1,4 +1,4 @@
-package primitives
+package cats
 
 object ContraFunctorRealExample extends App {
 

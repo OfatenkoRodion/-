@@ -35,3 +35,20 @@ object ContraFunctor extends App {
   printFormatted[Option[String]](Option("hello world"))(optionPrintable(stringPrintable))
 
 }
+
+object InvariantFunctor extends App {
+
+  trait Codec[A] {
+    def encode(value: A): String
+    def decode(value: String): A
+    def imap[B](dec: A => B, enc: B => A) = {
+      val self = this
+      new Codec[B] {
+        override def encode(value: B): String = self.encode(enc(value))
+        override def decode(value: String): B = dec(self.decode((value)))
+      }
+    }
+  }
+
+
+}
