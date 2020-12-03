@@ -28,7 +28,7 @@ object InvariantFunctorRealExample extends App {
 
   case class EmployeeDTO(id: Int, name: String)
 
-  val codecFunctorEmployee = new CodecFunctor[Employee] {
+  implicit val codecFunctorEmployee = new CodecFunctor[Employee] {
     override def encode(value: Employee): Json = {
       val encoderEmployee: Encoder[Employee] = deriveEncoder[Employee]
       encoderEmployee(value).asJson
@@ -40,8 +40,13 @@ object InvariantFunctorRealExample extends App {
     }
   }
 
-  val codecFunctorEmployeeDTO = codecFunctorEmployee.imap[EmployeeDTO](_.transformInto[EmployeeDTO], _.transformInto[Employee])
+  implicit val codecFunctorEmployeeDTO = codecFunctorEmployee.imap[EmployeeDTO](_.transformInto[EmployeeDTO], _.transformInto[Employee])
 
-  println(codecFunctorEmployeeDTO.encode(EmployeeDTO(500, "John")))
+
+  def encode[A](value: A)(implicit codecFunctor: CodecFunctor[A]) = println(codecFunctor.encode(value))
+
+
+  encode(Employee(500, "John"))
+  encode(EmployeeDTO(500, "John"))
 
 }
