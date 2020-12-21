@@ -1,7 +1,4 @@
-import java.io.StringWriter
-
-import io.prometheus.client.exporter.common.TextFormat
-import io.prometheus.client.{CollectorRegistry, Counter, Gauge, Histogram, Summary}
+import io.prometheus.client.{Counter, Gauge, Histogram, Summary}
 
 // Считает кол-во вызовов метода .inc
 // Можно через него считать кол-во вызовов контроллера
