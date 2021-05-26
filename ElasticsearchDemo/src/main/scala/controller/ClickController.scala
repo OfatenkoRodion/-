@@ -9,22 +9,24 @@ import utils.Controller
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import service.ClickService
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class ClickController(clickService: ClickService) extends Controller {
   override def route: Route = clickDemo
 
   protected def clickDemo: Route =
     path("click" / "demo") {
-      (post & entity(as[ConfigIdDTO])) { configIdDTO =>
-        val res = clickService.getData(configIdDTO.configId)
+      parameters("from", "size") { (from, size) =>
+        (post & entity(as[ConfigIdDTO])) { configIdDTO =>
+          val res = clickService.getData(configIdDTO.configId, Try(from.toInt).getOrElse(1), Try(size.toInt).getOrElse(10))
 
-        onComplete(res) { // TODO Brrr
-          case Success(None) => complete(errorResp)
-          case Success(value) => complete(value)
-          case Failure(th) =>
-            println(th)
-            complete(errorResp)
+          onComplete(res) { // TODO Brrr
+            case Success(None) => complete(errorResp)
+            case Success(value) => complete(value)
+            case Failure(th) =>
+              println(th)
+              complete(errorResp)
+          }
         }
       }
     }

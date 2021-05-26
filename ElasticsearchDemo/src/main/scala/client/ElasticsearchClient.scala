@@ -1,6 +1,6 @@
 package client
 
-import model.ElasticSearchConf
+import model.{ElasticSearchBuildRequest, ElasticSearchConf}
 import org.elasticsearch.client.{Request, RestClient}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -12,7 +12,7 @@ trait ElasticsearchClient {
 
   def refresh(inxName: String)
 
-  def viewData(inxName: String, path: String, conf: ElasticSearchConf): Future[String]
+  def viewData(inxName: String, path: String, conf: ElasticSearchBuildRequest): Future[String]
 
   def deleteIndex(inxName: String)
 }
@@ -64,15 +64,13 @@ class ElasticsearchClientImpl(client: RestClient)
     client.performRequest(request);
   }
 
-  def viewData(inxName: String, path: String, conf: ElasticSearchConf): Future[String] = {
+  def viewData(inxName: String, path: String, conf: ElasticSearchBuildRequest): Future[String] = {
     val request = new Request(
       "POST",
       s"/$inxName/$path/_search")
 
-    if (conf.elasticSearchFields._source.nonEmpty) {
-      import io.circe.syntax._
-      request.setJsonEntity(conf.elasticSearchFields.asJson.toString())
-    }
+    import io.circe.syntax._
+    request.setJsonEntity(conf.asJson.toString())
 
     Future(client.performRequest(request)).map(response =>
       scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
